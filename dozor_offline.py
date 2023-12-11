@@ -42,6 +42,7 @@ def parseArgs():
     parser.add_argument("-c", "--cut_off", help="cut off for hit rate calculation", type=int, default=5)
     parser.add_argument("-o", "--output", help="output directory", type=str, default="dozor_res")
     parser.add_argument("-n", "--nproc", help="num of procs", type=int, default=1)
+    
     return parser.parse_args()
 
 
@@ -81,10 +82,9 @@ def worker(work_num, master_file, dozor_dat, mask, start_img, end_img, output_fi
                 if mask is not None:
                     img[idx] = 65535
                
-                for tt in range(0,1): 
-                    res, spots = d.do_image(img)
+                res, spots = d.do_image(img)
                 current_img = i*cont_size+j+1
-                #gen_spots_adx(current_img, spots, output_dir)
+                #save_spots_adx(current_img, spots, output_dir)
                 if res.score3 > cut_off:
                     hit_num += 1
                 output.write("img %d %d %f %f\n" % (current_img, res.NofR, res.score3, res.dlim09))
@@ -99,7 +99,7 @@ def worker(work_num, master_file, dozor_dat, mask, start_img, end_img, output_fi
         output.close()
     return_dict[work_num] = hit_num
 
-def gen_spots_adx(img_num, spots, output_dir):
+def save_spots_adx(img_num, spots, output_dir):
     adx_filename = os.path.join(output_dir, "%06d.adx" % img_num)
     output = ""
     #print (adx_filename)
