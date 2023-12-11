@@ -183,6 +183,10 @@ if __name__ == "__main__":
         with h5py.File(mask_file, 'r') as m:
             mask = m['/data'][:]
             #print(type(mask), mask[1090][1012],mask[1012][1090])
+    else:
+        with h5py.File(master_file, 'r') as fh:
+            frame = fh['/entry/instrument/detector/detectorSpecific/pixel_mask']
+        mask = np.array(frame)
 
     gen_dozor_dat(master_file, dozor_dat)
 
