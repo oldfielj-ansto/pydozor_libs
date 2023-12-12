@@ -25,6 +25,6 @@ python interface to Dozor, https://git.embl.de/bourenko/dozor
 1. Modify the makefile of dozor, by adding "-fPIC" in the FCFLAGS
 2. Compile dozor
 3. compile the shared library by running the following command
-   `gfortran -fopenmp -o libdozor.so -shared -fPIC dozor_submain.o dozor_auxiliary_lib.o anis_gleb_all.o hkl_direct.o scancl.o`
+   `gfortran -fopenmp -o libdozor.so -shared -fPIC dozor_submain.o dozor_rw_lib.o dozor_auxiliary_lib.o anis_gleb_all.o hkl_direct.o scancl.o`
 4. add libdozor.so into the LD_LIBRARY_PATH as below
    `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/your/libdozor/path/`
