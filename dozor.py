@@ -127,6 +127,8 @@ class Dozor():
         dozor.read_dozor_(self.detector, self.data_input, fname, templ, library)
 
         self.local = ffi.new('struct LOCAL*')
+        self.detector.ix = self.detector.ix_unbinned * self.detector.binning_factor
+        self.detector.iy = self.detector.iy_unbinned * self.detector.binning_factor
         detector_xy = self.detector.ix * self.detector.iy
         self.PSIim = ffi.new('char[%d]' % detector_xy)
         self.KLim = ffi.new('char[%d]' % detector_xy)
