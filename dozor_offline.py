@@ -75,7 +75,10 @@ def worker(work_num, master_file, dozor_dat, mask, start_img, end_img, output_fi
 
             for j in range(start_tmp,end_tmp):
                 img = h5_data[j]
+                # convert data to uint16
                 if img.dtype == 'uint32':
+                    img = img.astype(np.uint16)
+                elif img.dtype == 'uint8':
                     img = img.astype(np.uint16)
  
                 # apply mask if it's not None
@@ -185,8 +188,7 @@ if __name__ == "__main__":
             #print(type(mask), mask[1090][1012],mask[1012][1090])
     else:
         with h5py.File(master_file, 'r') as fh:
-            frame = fh['/entry/instrument/detector/detectorSpecific/pixel_mask']
-        mask = np.array(frame)
+            mask = fh['/entry/instrument/detector/detectorSpecific/pixel_mask'][()]
 
     gen_dozor_dat(master_file, dozor_dat)
 
