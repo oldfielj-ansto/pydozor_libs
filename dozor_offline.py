@@ -48,6 +48,7 @@ def parseArgs():
 
 def worker(work_num, master_file, dozor_dat, mask, start_img, end_img, output_file, cut_off, return_dict):
     d = dozor.Dozor(dozor_dat.encode())
+    max_count = d.data_input.pixel_max
     hit_num = 0
     output_dir = os.path.dirname(output_file)
     if mask is not None:
@@ -77,6 +78,9 @@ def worker(work_num, master_file, dozor_dat, mask, start_img, end_img, output_fi
                 img = h5_data[j]
                 # convert data to uint16
                 if img.dtype == 'uint32':
+                    # if count is over 65534 and below max_count, set to the max value for uint16
+                    img[(img >65534) & (img <= max_count)] = 65534
+                    img[img > max_count] = 65535
                     img = img.astype(np.uint16)
                 elif img.dtype == 'uint8':
                     img = img.astype(np.uint16)
