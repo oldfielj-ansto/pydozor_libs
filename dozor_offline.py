@@ -91,6 +91,7 @@ def worker(work_num, master_file, dozor_dat, mask, start_img, end_img, output_fi
                
                 res, spots = d.do_image(img)
                 current_img = i*cont_size+j+1
+                #save spots in adx format, for debugging
                 #save_spots_adx(current_img, spots, output_dir)
                 if res.score3 > cut_off:
                     hit_num += 1
