@@ -36,7 +36,7 @@ def parseArgs():
     parser = argparse.ArgumentParser(description = "analyze Eiger hdf5 data by dozor")
 
     parser.add_argument("-m", "--master", help="EIGER master file", type=str, required=True)
-    parser.add_argument("-M", "--mask", help="EIGER master file", type=str, default=None)
+    parser.add_argument("-M", "--mask", help="EIGER mask file", type=str, default=None)
     parser.add_argument("-s", "--start", help="start img", type=int, default=1)
     parser.add_argument("-e", "--end", help="end img", type=int, default=-1)
     parser.add_argument("-c", "--cut_off", help="cut off for hit rate calculation", type=int, default=5)
