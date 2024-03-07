@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.6
 
-FROM dozor:latest
+FROM docker.asci.synchrotron.org.au/mx3/dozor:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG PYTHON_VERSION=3.11
