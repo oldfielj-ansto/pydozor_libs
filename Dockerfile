@@ -25,8 +25,10 @@ WORKDIR /opt/pydozor
 RUN python${PYTHON_VERSION} -m venv ./.venv
 
 # Copy across project files
-COPY --link ./dozor.py ./dozor_offline.py ./
-COPY --link ./pyproject.toml ./poetry.lock ./
+# COPY --link ./dozor.py ./dozor_offline.py ./
+COPY ./dozor.py ./dozor_offline.py ./
+# COPY --link ./pyproject.toml ./poetry.lock ./
+COPY ./pyproject.toml ./poetry.lock ./
 
 # Install project and dependencies
 RUN python${PYTHON_VERSION} -m poetry install \
