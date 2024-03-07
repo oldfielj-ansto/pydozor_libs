@@ -36,15 +36,17 @@ RUN python${PYTHON_VERSION} -m poetry install \
 
 ENV HDF5_PLUGIN_PATH="/opt/pydozor/.venv/lib/python${PYTHON_VERSION}/site-packages/bitshuffle/plugin"
 
-COPY <<EOF entrypoint.sh
-#!/usr/bin/env bash
-source /opt/pydozor/.venv/bin/activate
-if [ -z "$*" ]; then
-  exec /bin/bash
-else
-  exec python /opt/pydozor/dozor_offline.py "$@"
-fi
-EOF
-RUN chmod +x entrypoint.sh
+# COPY <<EOF entrypoint.sh
+# #!/usr/bin/env bash
+# set -e
+# source /opt/pydozor/.venv/bin/activate
+# if [ -z "\$*" ]; then
+#   exec bash --login
+# else
+#   python /opt/pydozor/dozor_offline.py "\$@"
+# fi
+# EOF
+# RUN chmod +x entrypoint.sh
+COPY ./entrypoint.sh ./
 
 ENTRYPOINT [ "/opt/pydozor/entrypoint.sh" ]
