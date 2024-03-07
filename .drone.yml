@@ -1,0 +1,99 @@
+---
+kind: pipeline
+type: kubernetes
+name: new-commit
+trigger:
+  ref:
+    - refs/heads/main
+steps:
+  - name: docker-push-dev
+    image: plugins/docker
+    when:
+      status: [success]
+    settings:
+      username:
+        from_secret: dockerHubAccount
+      password:
+        from_secret: dockerHubPassword
+      repo: docker.asci.synchrotron.org.au/${DRONE_REPO,,}
+      cache_from: docker.asci.synchrotron.org.au/${DRONE_REPO,,}:main
+      tags:
+        - main
+        - latest
+        - ${DRONE_COMMIT}
+      mtu: 1480
+      build_args:
+        - BUILD_GIT_BRANCH=${DRONE_COMMIT_BRANCH}
+        - BUILD_GIT_COMMIT=${DRONE_COMMIT}
+        - BUILD_GIT_AUTHOR=${DRONE_COMMIT_AUTHOR}
+        - BUILD_GIT_AUTHOR_NAME=${DRONE_COMMIT_AUTHOR_NAME}
+        - BUILD_GIT_REPO_LINK=${DRONE_REPO_LINK}
+        - BUILD_CREATED=${DRONE_BUILD_CREATED}
+        - BUILD_NUMBER=${DRONE_BUILD_NUMBER}
+
+  - name: notify-teams
+    image: docker.asci.synchrotron.org.au/dpi/as-drone-teams-notify:main
+    settings:
+      webhook_url:
+        from_secret: mxTeamsCIWebhook
+
+---
+kind: pipeline
+type: kubernetes
+name: new-release
+trigger:
+  ref:
+    - refs/tags/*
+steps:
+  - name: docker-push-prod
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: dockerHubAccount
+      password:
+        from_secret: dockerHubPassword
+      repo: docker.asci.synchrotron.org.au/${DRONE_REPO,,}
+      cache_from: docker.asci.synchrotron.org.au/${DRONE_REPO,,}:latest
+      tags:
+        - latest
+        - ${DRONE_TAG}-${DRONE_BUILD_NUMBER}
+      mtu: 1480
+      build_args:
+        - BUILD_GIT_BRANCH=${DRONE_COMMIT_BRANCH}
+        - BUILD_GIT_COMMIT=${DRONE_COMMIT}
+        - BUILD_GIT_AUTHOR=${DRONE_COMMIT_AUTHOR}
+        - BUILD_GIT_AUTHOR_NAME=${DRONE_COMMIT_AUTHOR_NAME}
+        - BUILD_GIT_REPO_LINK=${DRONE_REPO_LINK}
+        - BUILD_CREATED=${DRONE_BUILD_CREATED}
+        - BUILD_NUMBER=${DRONE_BUILD_NUMBER}
+
+  - name: notify-teams
+    image: docker.asci.synchrotron.org.au/dpi/as-drone-teams-notify:main
+    settings:
+      webhook_url:
+        from_secret: mxTeamsCIWebhook
+
+---
+kind: secret
+name: mxTeamsCIWebhook
+get:
+  path: asci-cicd-prod
+  name: mxTeamsCIWebhook
+---
+kind: secret
+name: dockerServer
+get:
+  path: asci-cicd-prod
+  name: dockerServer
+---
+kind: secret
+name: dockerHubAccount
+get:
+  path: asci-cicd-prod
+  name: dockerHubAccount
+---
+kind: secret
+name: dockerHubPassword
+get:
+  path: asci-cicd-prod
+  name: dockerHubPassword
