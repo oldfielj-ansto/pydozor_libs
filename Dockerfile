@@ -21,21 +21,7 @@ RUN python${PYTHON_VERSION} -m pip install poetry==${POETRY_VERSION}
 
 WORKDIR /opt/pydozor
 
-# Create project virtual environment
-RUN python${PYTHON_VERSION} -m venv ./.venv
-
-# Copy across project files
-# COPY --link ./dozor.py ./dozor_offline.py ./
-COPY ./dozor.py ./dozor_offline.py ./
-# COPY --link ./pyproject.toml ./poetry.lock ./
-COPY ./pyproject.toml ./poetry.lock ./
-
-# Install project and dependencies
-RUN python${PYTHON_VERSION} -m poetry install \
-    --compile --only ${POETRY_DEPENDENCY_GROUPS}
-
-ENV HDF5_PLUGIN_PATH="/opt/pydozor/.venv/lib/python${PYTHON_VERSION}/site-packages/bitshuffle/plugin"
-
+# Setup entrypoint script
 # COPY <<EOF entrypoint.sh
 # #!/usr/bin/env bash
 # set -e
@@ -48,5 +34,20 @@ ENV HDF5_PLUGIN_PATH="/opt/pydozor/.venv/lib/python${PYTHON_VERSION}/site-packag
 # EOF
 # RUN chmod +x entrypoint.sh
 COPY ./entrypoint.sh ./
+
+# Create project virtual environment
+RUN python${PYTHON_VERSION} -m venv ./.venv
+
+# Install project and dependencies
+# COPY --link ./pyproject.toml ./poetry.lock ./
+COPY ./pyproject.toml ./poetry.lock ./
+RUN python${PYTHON_VERSION} -m poetry install \
+    --compile --only ${POETRY_DEPENDENCY_GROUPS}
+
+ENV HDF5_PLUGIN_PATH="/opt/pydozor/.venv/lib/python${PYTHON_VERSION}/site-packages/bitshuffle/plugin"
+
+# Copy across project files
+# COPY --link ./dozor.py ./dozor_offline.py ./
+COPY ./dozor.py ./dozor_offline.py ./
 
 ENTRYPOINT [ "/opt/pydozor/entrypoint.sh" ]
