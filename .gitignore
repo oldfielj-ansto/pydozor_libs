@@ -124,3 +124,4 @@ dmypy.json
 .pyre/
 
 .tmp_pydozor_output/
+.test_data/
