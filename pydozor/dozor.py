@@ -1,5 +1,7 @@
-import numpy as np
 from cffi import FFI
+
+__all__ = ("Dozor",)
+
 
 ffi = FFI()
 ffi.cdef("""

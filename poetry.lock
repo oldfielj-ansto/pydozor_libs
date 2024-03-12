@@ -516,4 +516,4 @@ reference = "cachedpypi"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "ec5169724c1bd2b0d43fb7bb1fdf56743a6a46965fb7b2f9a44e9bc3152134f6"
+content-hash = "1d6c3b550c71c0ea92644574876c76fda23c4e45c9647769e9760303e25d604e"

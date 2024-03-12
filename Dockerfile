@@ -47,7 +47,9 @@ RUN python${PYTHON_VERSION} -m poetry install \
 ENV HDF5_PLUGIN_PATH="/opt/pydozor/.venv/lib/python${PYTHON_VERSION}/site-packages/bitshuffle/plugin"
 
 # Copy across project files
-# COPY --link ./dozor.py ./dozor_offline.py ./
-COPY ./dozor.py ./dozor_offline.py ./
+# COPY --link ./pydozor ./pydozor
+COPY ./pydozor ./pydozor
+# COPY --link ./dozor_offline.py ./
+COPY ./dozor_offline.py ./
 
 ENTRYPOINT [ "/opt/pydozor/entrypoint.sh" ]
