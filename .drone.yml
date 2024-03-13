@@ -6,6 +6,38 @@ trigger:
   ref:
     - refs/heads/main
 steps:
+  # - name: pylint
+  #   image: python:3.11
+  #   commands:
+  #     - python -m pip install poetry==1.8.1 --user
+  #     - python -m poetry install --with dev
+  #     - python -m poetry run pre-commit run -a
+
+  - name: build
+    image: python:3.11
+    volumes:
+      - name: dist
+        path: ./dist
+    commands:
+      - python -m pip install poetry==1.8.1 --user
+      - python -m poetry build
+
+  - name: publish-package-dev
+    image: plugins/pypi
+    volumes:
+      - name: dist
+        path: ./dist
+    settings:
+      username:
+        from_secret: pypiUsername
+      password:
+        from_secret: pypiPassword
+      repository: https://pypi.asci.synchrotron.org.au/mx3/dev
+      distributions:
+        - sdist
+        - bdist_wheel
+      skip_build: true
+
   - name: docker-push-dev
     image: plugins/docker
     when:
@@ -45,6 +77,31 @@ trigger:
   ref:
     - refs/tags/*
 steps:
+  - name: build
+    image: python:3.11
+    volumes:
+      - name: dist
+        path: ./dist
+    commands:
+      - python -m pip install poetry==1.8.1 --user
+      - python -m poetry build
+
+  - name: publish-package-prod
+    image: plugins/pypi
+    volumes:
+      - name: dist
+        path: ./dist
+    settings:
+      username:
+        from_secret: pypiUsername
+      password:
+        from_secret: pypiPassword
+      repository: https://pypi.asci.synchrotron.org.au/mx3/prod
+      distributions:
+        - sdist
+        - bdist_wheel
+      skip_build: true
+
   - name: docker-push-prod
     image: plugins/docker
     settings:
@@ -79,6 +136,18 @@ name: mxTeamsCIWebhook
 get:
   path: asci-cicd-prod
   name: mxTeamsCIWebhook
+---
+kind: secret
+name: pypiUsername
+get:
+  path: asci-cicd-prod
+  name: pypiUsername
+---
+kind: secret
+name: pypiPassword
+get:
+  path: asci-cicd-prod
+  name: pypiPassword
 ---
 kind: secret
 name: dockerServer

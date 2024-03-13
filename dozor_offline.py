@@ -23,11 +23,9 @@ optional arguments:
 import argparse
 import numpy as np
 import h5py
-import sys
 import os
-import dozor
 import multiprocessing
-import bitshuffle
+from pydozor import Dozor
 
 def parseArgs():
     """
@@ -47,7 +45,7 @@ def parseArgs():
 
 
 def worker(work_num, master_file, dozor_dat, mask, start_img, end_img, output_file, cut_off, return_dict):
-    d = dozor.Dozor(dozor_dat.encode())
+    d = Dozor(dozor_dat.encode())
     max_count = d.data_input.pixel_max
     hit_num = 0
     output_dir = os.path.dirname(output_file)

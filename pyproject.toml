@@ -1,7 +1,6 @@
 [tool.poetry]
 name = "pydozer"
 version = "0.1.0"
-package-mode = false
 description = "Python interface to Dozor."
 license = "MIT"
 authors = ["Jie Nan <jie.nan@maxiv.lu.se>"]
@@ -9,6 +8,9 @@ readme = "README.md"
 homepage = "https://github.com/JieNanMAXIV/pydozor_libs"
 repository = "https://github.com/JieNanMAXIV/pydozor_libs"
 documentation = "https://github.com/JieNanMAXIV/pydozor_libs"
+packages = [
+  { include = "pydozor" }
+]
 
 
 [[tool.poetry.source]]
@@ -29,10 +31,10 @@ priority = "supplemental"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-numpy = "1.26.4"
-cffi = "1.16.0"
-h5py = "3.10.0"
-bitshuffle = "0.5.1"
+numpy = "^1.26.4"
+cffi = "^1.16.0"
+h5py = "^3.10.0"
+bitshuffle = "^0.5.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "3.6.2"
