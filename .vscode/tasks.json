@@ -9,7 +9,7 @@
             "dockerBuild": {
                 "context": "${workspaceFolder}",
                 "dockerfile": "${workspaceFolder}/Dockerfile",
-                "tag": "pydozer:debug",
+                "tag": "pydozor:debug",
                 "pull": false,
             }
         },
@@ -18,8 +18,8 @@
             "type": "docker-run",
             "dependsOn": ["docker-build"],
             "dockerRun": {
-                "containerName": "pydozer",
-                "image": "pydozer:debug",
+                "containerName": "pydozor",
+                "image": "pydozor:debug",
                 "env": {
                     "VIRTUAL_ENV": "/opt/pydozor/.venv",
                     "PATH": "/opt/pydozor/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"

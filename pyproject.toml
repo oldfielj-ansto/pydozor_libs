@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pydozer"
+name = "pydozor"
 version = "0.1.0"
 description = "Python interface to Dozor."
 license = "MIT"
