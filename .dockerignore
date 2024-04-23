@@ -123,6 +123,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.tmp_pydozor_output/
+# IDE
+.venv/
+.vscode/
+
 .test_data/
-/test.py
+.tmp_pydozor_output/

@@ -1,115 +1,45 @@
-from cffi import FFI
+from __future__ import annotations
+from typing import Any, Self
+from pathlib import Path
+from tempfile import mkdtemp
+from datetime import datetime, timezone
+from pydantic import NewPath, validate_call
+from ._compat import ffi
+from .schemas import DozorConfig
 
-__all__ = ("Dozor",)
-
-
-ffi = FFI()
-ffi.cdef("""
-    struct DETECTOR
-    {
-        int ix, iy;
-        int ix_unbinned, iy_unbinned;
-        int binning_factor;     
-        float pixel;
-    };
-    
-    struct DATACOL
-    {
-        float wave;
-        float dist;
-        float monoch;
-        float aconst;
-        int Ispot;
-        float texposure;
-        int mrd;
-        float hmax2;
-        float hmin2;
-        float delh2;
-        float mgain;
-        float backpol[51];
-        float backpolP[51];
-        float backerr[51];
-            
-        float IMstep;
-
-        float xcen, ycen;
-        float start_angl, phiwidth;
-        int number_images,image_first;
-        int graph, sprint, backg, rd, isum;
-        int w, wg;
-        int pr;
-        int prAll;
-        float vbin[50];
-        int pixel_min, pixel_max;
-        int Kxmin, Kxmax, Kymin, Kymax;
-        int nbad;
-        int Bxmin[50], Bxmax[50], Bymin[50], Bymax[50];
-        int wedge;
-        int pLim1[1101], pLim2[1101];
-        float idealback0[50];
-        float idealback[150]; //50*3
-            
-        float RList[51051]; //51*1001
-        float hklKoor[102000]; //51*1000*2
-        float Ilimit[51];
-        
-        float vbins[51];
-        float vbina[51];
-        float Wil[2103]; //3*701
-
-        float beamstop_size;
-        float beamstop_distance;
-        int beamstop_vertical;
-            
-        float sigLev;
-    };
-    
-    struct LOCAL
-    {
-        float cos2tet2[51];
-        float pol[765]; //51*15
-        float absorb[51];
-    };
-    
-    struct DATACOL_PICKLE
-    {
-        float backpol2D[51];
-        float Rfexp;
-        float Iav;
-        int NofR;
-        float dlim;
-        double SumTotal2D, SumBack2D;
-        float Coef;
-        int table_suc;
-        double table_sc;
-        double table_b;
-        float table_resol;
-        float table_corr;
-        float table_rfact;
-        float table_intsum;
-    
-        float table_est;      
-        float score2;
-        float score3;
-        float dlim09;
-        int   NofS;
-    };
-    
-    struct Reflection
-    {
-        float x;
-        float y;
-        float intensity;
-    };
-    
-    void dozor_set_defaults_(struct DATACOL*);
-    void read_dozor_(struct DETECTOR*, struct DATACOL*, char[1024], char[1024], char*);
-    void pre_dozor_(struct DETECTOR*, struct DATACOL*, struct LOCAL*, char*, char*, int*);
-    void dozor_do_image_(short*, struct DETECTOR*, struct DATACOL*, struct DATACOL*, struct DATACOL_PICKLE*, struct LOCAL*, char*, char*);
-    void dozor_get_spot_list_(struct DETECTOR*, struct DATACOL*, struct DATACOL_PICKLE*, short*, struct Reflection*);
-    """)
+__all__ = ("create_config_file", "Dozor")
 
 dozor = ffi.dlopen('libdozor.so')
+
+
+@validate_call
+def create_config_file(
+    config: DozorConfig,
+    *,
+    path: NewPath | None = None,
+) -> Path:
+    """Create a new Dozor config file.
+
+    Parameters
+    ----------
+    config : DozorConfig
+        Dozor configuration to be written to disk.
+    path : NewPath | None, optional
+        Path to create Dozor config file at, if undefined a `dozor.dat` file
+        will be created under a new temporary directory, by default None.
+
+    Returns
+    -------
+    Path
+        File path to created Dozor config file.
+    """
+    if path is None:
+        path = Path(f"{mkdtemp()}/dozor.dat")
+
+    with open(path, "w") as _file:
+        _file.write(config.model_dump())
+    return path
+
 
 class Dozor():
     def __init__(self, config_file):
@@ -137,14 +67,31 @@ class Dozor():
         debug = ffi.new('int*', 0)
         dozor.pre_dozor_(self.detector, self.data_input, self.local, self.PSIim, self.KLim, debug)
 
-    def do_image(self, img):
-        data = ffi.new('struct DATACOL_PICKLE*')
-        datacol = ffi.new('struct DATACOL*')
-        dozor.dozor_do_image_(ffi.cast('short*', ffi.from_buffer(img)), self.detector, 
-                              self.data_input, datacol, data, self.local, self.PSIim, self.KLim)
-        #print ("get spots results")
-        # get spot list
-        spots = None
-        spots = ffi.new('struct Reflection[%d]' %data.NofR)
-        dozor.dozor_get_spot_list_(self.detector, datacol, data, ffi.cast('short*', ffi.from_buffer(img)), spots)
-        return data, spots
+    def do_image(self: Self, img: Any) -> Any:
+        _data = ffi.new("struct DATACOL_PICKLE*")
+        _datacol = ffi.new("struct DATACOL*")
+        _c_img = ffi.cast("short*", ffi.from_buffer(img))
+        _started = datetime.now(timezone.utc)
+        dozor.dozor_do_image_(
+            _c_img,
+            self.detector,
+            self.data_input,
+            _datacol,
+            _data,
+            self.local,
+            self.PSIim,
+            self.KLim,
+        )
+        _finished = datetime.now(timezone.utc)
+        return _data
+
+    def get_spot_list(self: Self, img: Any, data: Any, datacol: Any) -> Any:
+        _spots = ffi.new(f"struct Reflection[{data.NofR}]")
+        dozor.dozor_get_spot_list_(
+            self.detector,
+            datacol,
+            data,
+            ffi.cast("short*", ffi.from_buffer(img)),
+            _spots,
+        )
+        return _spots

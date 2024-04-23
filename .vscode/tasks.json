@@ -22,16 +22,23 @@
                 "image": "pydozor:debug",
                 "env": {
                     "VIRTUAL_ENV": "/opt/pydozor/.venv",
-                    "PATH": "/opt/pydozor/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                    "PATH": "/opt/pydozor/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "TEST_DATA_FRAMES": "/opt/pydozor/.testing/data_frames/test_data.dump",
+                    "MASK": "/opt/pydozor/.testing/detector_mask/mask.npy"
                 },
                 "volumes": [
                     {
-                        "containerPath": "/opt/dozor/.test_data",
-                        "localPath": "${workspaceFolder}/.test_data",
+                        "containerPath": "/opt/pydozor/.testing/detector_mask",
+                        "localPath": "${workspaceFolder}/.detector_mask",
                         "permissions": "ro"
                     },
                     {
-                        "containerPath": "/opt/pydozor/.tmp_pydozor_output",
+                        "containerPath": "/opt/pydozor/.testing/data_frames",
+                        "localPath": "${workspaceFolder}/.data_frames",
+                        "permissions": "ro"
+                    },
+                    {
+                        "containerPath": "/opt/pydozor/.testing/data_results",
                         "localPath": "${workspaceFolder}/.tmp_pydozor_output",
                         "permissions": "rw"
                     }
@@ -39,7 +46,7 @@
                 "remove": true
             },
             "python": {
-                "file": "/opt/pydozor/dozor_offline.py",
+                "file": "/opt/pydozor/test.py",
                 "wait": true
             }
         }
