@@ -1,6 +1,12 @@
 from __future__ import annotations
 
 from os import environ
+from os.path import (
+    dirname as os_dirname,
+    realpath as os_realpath,
+    join as os_joinpath,
+    abspath as os_abspath,
+)
 from pathlib import Path
 from tempfile import mkdtemp
 from typing import TYPE_CHECKING, Self
@@ -15,7 +21,16 @@ if TYPE_CHECKING:
 
 __all__ = ("create_config_file", "Dozor")
 
-dozor = ffi.dlopen(environ.get("LIB_DOZOR_PATH", "libdozor.so"))
+CUR_DIR = os_dirname(os_realpath(__file__))
+
+
+_lib_dozor_path = "libdozor.so"
+if "LIB_DOZOR_PATH" in environ:
+    _lib_dozor_path = environ.get("LIB_DOZOR_PATH")
+elif Path(os_joinpath(CUR_DIR, "../libdozor.so")).exists():
+    _lib_dozor_path = str(os_abspath(os_joinpath(CUR_DIR, "../libdozor.so")))
+
+dozor = ffi.dlopen(_lib_dozor_path)
 
 
 @validate_call

@@ -125,7 +125,7 @@ def main() -> None:
     # Add `libdozer.so` to build includes
     _pyproject["tool"]["poetry"]["include"].append(
         {
-            "path": "libdozor.so",
+            "path": "*.so",
             "format": ["sdist", "wheel"],
         }
     )
