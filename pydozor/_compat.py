@@ -1,11 +1,13 @@
 from typing import TYPE_CHECKING, Any, ClassVar, Self, overload
+
 from cffi import FFI
 
 __all__ = ("ffi", "Detector", "Datacol", "Local", "DatacolPickle", "Reflection")
 
 
 ffi = FFI()
-ffi.cdef("""
+ffi.cdef(
+    """
 struct DETECTOR
 {
     int ix, iy;
@@ -101,7 +103,8 @@ void read_dozor_(struct DETECTOR*, struct DATACOL*, char[1024], char[1024], char
 void pre_dozor_(struct DETECTOR*, struct DATACOL*, struct LOCAL*, char*, char*, int*);
 void dozor_do_image_(short*, struct DETECTOR*, struct DATACOL*, struct DATACOL*, struct DATACOL_PICKLE*, struct LOCAL*, char*, char*);
 void dozor_get_spot_list_(struct DETECTOR*, struct DATACOL*, struct DATACOL_PICKLE*, short*, struct Reflection*);
-""")
+"""
+)
 
 
 class _CData:
@@ -111,8 +114,9 @@ class _CData:
     _cdecl_size: ClassVar[int | None]
 
     if TYPE_CHECKING:
+
         @overload
-        def __new__(cls: type[Self], **kwargs: Any) -> Self: ...
+        def __new__(cls: type[Self], **kwargs: Any) -> Self: ...  # noqa: E704
 
     def __new__(cls: type[Self], **kwargs: Any) -> FFI.CData:
         _cdata = ffi.new(cls._cdecl)

@@ -12,7 +12,7 @@ python interface to Dozor, https://git.embl.de/bourenko/dozor
 
 ## Instatll
 1. Download Dozor source code
-2. change the Makefile 
+2. change the Makefile
 
 ## Usage
 - dozor.py is the python interface to call dozor(Fortran) shared library

@@ -6,6 +6,14 @@ trigger:
   ref:
     - refs/heads/main
 steps:
+  - name: "Pre-Commit Checks"
+    image: python:3.11-slim-bookworm
+    commands:
+      - env | sort
+      - python -m pip install "poetry==${POETRY_VERSION:=1.8.2}" --user
+      - python -m poetry install --only main,dev
+      - python -m poetry run pre-commit run --all-files
+
   - name: "[Dev] Docker Build PIP Package"
     image: moby/buildkit:rootless
     when:
@@ -95,6 +103,14 @@ trigger:
   ref:
     - refs/tags/*
 steps:
+  - name: "Pre-Commit Checks"
+    image: python:3.11-slim-bookworm
+    commands:
+      - env | sort
+      - python -m pip install "poetry==${POETRY_VERSION:=1.8.2}" --user
+      - python -m poetry install --only main,dev
+      - python -m poetry run pre-commit run --all-files
+
   - name: "[Prod] Docker Build PIP Package"
     image: moby/buildkit:rootless
     when:

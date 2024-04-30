@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, TYPE_CHECKING
-from typing_extensions import Literal, TypedDict
+from typing import TYPE_CHECKING, Any, Callable, Self
+
 from pydantic import BaseModel, ConfigDict, Field, model_serializer
+from typing_extensions import Literal, TypedDict
 
 if TYPE_CHECKING:
     from pydantic.main import IncEx

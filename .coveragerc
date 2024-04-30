@@ -1,0 +1,5 @@
+[run]
+omit =
+    tests/*
+    test.py
+    as_pydantic_utils/__version__.py

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from os import environ
-from typing import TYPE_CHECKING, Self
 from pathlib import Path
 from tempfile import mkdtemp
+from typing import TYPE_CHECKING, Self
+
 from pydantic import FilePath, NewPath, validate_call
-from ._compat import ffi, Detector, Datacol, Local, DatacolPickle, Reflection
-from .schemas import DozorConfig, DataSchema, DatacolSchema, ReflectionSchema
+
+from ._compat import Datacol, DatacolPickle, Detector, Local, Reflection, ffi
+from .schemas import DatacolSchema, DataSchema, DozorConfig, ReflectionSchema
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -61,7 +63,7 @@ class Dozor:
             _data_input,
             ffi.new("char[1024]", str(config_file).encode("utf-8")),
             ffi.new("char[1024]"),
-            ffi.cast('char*', ffi.NULL),
+            ffi.cast("char*", ffi.NULL),
         )
 
         _detector.ix = _detector.ix_unbinned * _detector.binning_factor
@@ -152,6 +154,5 @@ class Dozor:
             _spots,
         )
         return [
-            Reflection.to_dict(_item)
-            for _item in ffi.unpack(_spots, _spots_length)
+            Reflection.to_dict(_item) for _item in ffi.unpack(_spots, _spots_length)
         ]

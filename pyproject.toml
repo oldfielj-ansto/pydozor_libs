@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydozor"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python interface to Dozor."
 license = "MIT"
 authors = ["Jie Nan <jie.nan@maxiv.lu.se>"]
@@ -46,6 +46,9 @@ dectris-compression = ">=0.3.1,<0.4.0"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
+platformdirs = "4.2.1"
+filelock = "3.14.0"
+distlib = "0.3.8"
 pre-commit = "3.7.0"
 
 
