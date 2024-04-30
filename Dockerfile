@@ -74,8 +74,6 @@ COPY --link <<EOF requirements.txt
 tomlkit == 0.12.4 --hash=sha256:5cd82d48a3dd89dee1f9d64420aa20ae65cfbd00668d6f094d7578a78efbb77b
 EOF
 RUN <<EOT /bin/sh
-set -e;
-
 _pip_index_url="https://pypi.org/simple"
 _pip_user_agent=python - <<-\GET_PIP_USER_AGENT
 from sys import stdout
