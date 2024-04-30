@@ -123,6 +123,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.tmp_pydozor_output/
+.data_frames/
+.detector_mask/
 .test_data/
+.tmp_pydozor_output/
 /test.py

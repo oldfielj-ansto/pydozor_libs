@@ -24,6 +24,7 @@
                     "VIRTUAL_ENV": "/opt/pydozor/.venv",
                     "PATH": "/opt/pydozor/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
                     "TEST_DATA_FRAMES": "/opt/pydozor/.testing/data_frames/test_data.dump",
+                    "TEST_DATA_OUTPUT": "/opt/pydozor/.testing/data_results/ready_test_data.dump",
                     "MASK": "/opt/pydozor/.testing/detector_mask/mask.npy"
                 },
                 "volumes": [

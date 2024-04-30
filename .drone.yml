@@ -6,24 +6,38 @@ trigger:
   ref:
     - refs/heads/main
 steps:
-  # - name: pylint
-  #   image: python:3.11
-  #   commands:
-  #     - python -m pip install poetry==1.8.1 --user
-  #     - python -m poetry install --with dev
-  #     - python -m poetry run pre-commit run -a
-
-  - name: build
-    image: python:3.11
+  - name: "[Dev] Docker Build PIP Package"
+    image: moby/buildkit:rootless
+    when:
+      status: [success]
+    environment:
+      BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
     volumes:
       - name: dist
         path: ./dist
     commands:
-      - python -m pip install poetry==1.8.1 --user
-      - python -m poetry build
+      - |
+        <<EOT sh
+        /usr/bin/buildctl-daemonless.sh build \
+          --progress 'plain' \
+          --frontend 'dockerfile.v0' \
+          --local 'context=.' \
+          --local 'dockerfile=.' \
+          --output 'type=local,dest=./dist' \
+          --opt target=dist \
+          --opt build-arg:BUILD_GIT_BRANCH=${DRONE_COMMIT_BRANCH} \
+          --opt build-arg:BUILD_GIT_COMMIT=${DRONE_COMMIT} \
+          --opt build-arg:BUILD_GIT_AUTHOR=${DRONE_COMMIT_AUTHOR} \
+          --opt build-arg:BUILD_GIT_AUTHOR_NAME=${DRONE_COMMIT_AUTHOR_NAME} \
+          --opt build-arg:BUILD_GIT_REPO_LINK=${DRONE_REPO_LINK} \
+          --opt build-arg:BUILD_CREATED=${DRONE_BUILD_CREATED} \
+          --opt build-arg:BUILD_NUMBER=${DRONE_BUILD_NUMBER}
+        EOT
 
-  - name: publish-package-dev
+  - name: "[Dev] Publish to PyPi"
     image: plugins/pypi
+    when:
+      status: [success]
     volumes:
       - name: dist
         path: ./dist
@@ -38,30 +52,34 @@ steps:
         - bdist_wheel
       skip_build: true
 
-  - name: docker-push-dev
-    image: plugins/docker
+  - name: "[Dev] Docker Push"
+    image: moby/buildkit:rootless
     when:
       status: [success]
-    settings:
-      username:
+    environment:
+      BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+      DOCKER_USERNAME:
         from_secret: dockerHubAccount
-      password:
+      DOCKER_PASSWORD:
         from_secret: dockerHubPassword
-      repo: docker.asci.synchrotron.org.au/${DRONE_REPO,,}
-      cache_from: docker.asci.synchrotron.org.au/${DRONE_REPO,,}:main
-      tags:
-        - main
-        - latest
-        - ${DRONE_COMMIT}
-      mtu: 1480
-      build_args:
-        - BUILD_GIT_BRANCH=${DRONE_COMMIT_BRANCH}
-        - BUILD_GIT_COMMIT=${DRONE_COMMIT}
-        - BUILD_GIT_AUTHOR=${DRONE_COMMIT_AUTHOR}
-        - BUILD_GIT_AUTHOR_NAME=${DRONE_COMMIT_AUTHOR_NAME}
-        - BUILD_GIT_REPO_LINK=${DRONE_REPO_LINK}
-        - BUILD_CREATED=${DRONE_BUILD_CREATED}
-        - BUILD_NUMBER=${DRONE_BUILD_NUMBER}
+    commands:
+      - |
+        <<EOT sh
+        /usr/bin/buildctl-daemonless.sh build \
+          --progress 'plain' \
+          --frontend 'dockerfile.v0' \
+          --local 'context=.' \
+          --local 'dockerfile=.' \
+          --output 'type=image,name=docker.asci.synchrotron.org.au/${DRONE_REPO,,}:${DRONE_COMMIT},push=true' \
+          --opt target=runtime \
+          --opt build-arg:BUILD_GIT_BRANCH=${DRONE_COMMIT_BRANCH} \
+          --opt build-arg:BUILD_GIT_COMMIT=${DRONE_COMMIT} \
+          --opt build-arg:BUILD_GIT_AUTHOR=${DRONE_COMMIT_AUTHOR} \
+          --opt build-arg:BUILD_GIT_AUTHOR_NAME=${DRONE_COMMIT_AUTHOR_NAME} \
+          --opt build-arg:BUILD_GIT_REPO_LINK=${DRONE_REPO_LINK} \
+          --opt build-arg:BUILD_CREATED=${DRONE_BUILD_CREATED} \
+          --opt build-arg:BUILD_NUMBER=${DRONE_BUILD_NUMBER}
+        EOT
 
   - name: notify-teams
     image: docker.asci.synchrotron.org.au/dpi/as-drone-teams-notify:main
@@ -77,17 +95,38 @@ trigger:
   ref:
     - refs/tags/*
 steps:
-  - name: build
-    image: python:3.11
+  - name: "[Prod] Docker Build PIP Package"
+    image: moby/buildkit:rootless
+    when:
+      status: [success]
+    environment:
+      BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
     volumes:
       - name: dist
         path: ./dist
     commands:
-      - python -m pip install poetry==1.8.1 --user
-      - python -m poetry build
+      - |
+        <<EOT sh
+        /usr/bin/buildctl-daemonless.sh build \
+          --progress 'plain' \
+          --frontend 'dockerfile.v0' \
+          --local 'context=.' \
+          --local 'dockerfile=.' \
+          --output 'type=local,dest=./dist' \
+          --opt target=dist \
+          --opt build-arg:BUILD_GIT_BRANCH=${DRONE_COMMIT_BRANCH} \
+          --opt build-arg:BUILD_GIT_COMMIT=${DRONE_COMMIT} \
+          --opt build-arg:BUILD_GIT_AUTHOR=${DRONE_COMMIT_AUTHOR} \
+          --opt build-arg:BUILD_GIT_AUTHOR_NAME=${DRONE_COMMIT_AUTHOR_NAME} \
+          --opt build-arg:BUILD_GIT_REPO_LINK=${DRONE_REPO_LINK} \
+          --opt build-arg:BUILD_CREATED=${DRONE_BUILD_CREATED} \
+          --opt build-arg:BUILD_NUMBER=${DRONE_BUILD_NUMBER}
+        EOT
 
-  - name: publish-package-prod
+  - name: "[Prod] Publish to PyPi"
     image: plugins/pypi
+    when:
+      status: [success]
     volumes:
       - name: dist
         path: ./dist
@@ -102,27 +141,34 @@ steps:
         - bdist_wheel
       skip_build: true
 
-  - name: docker-push-prod
-    image: plugins/docker
-    settings:
-      username:
+  - name: "[Prod] Docker Push"
+    image: moby/buildkit:rootless
+    when:
+      status: [success]
+    environment:
+      BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+      DOCKER_USERNAME:
         from_secret: dockerHubAccount
-      password:
+      DOCKER_PASSWORD:
         from_secret: dockerHubPassword
-      repo: docker.asci.synchrotron.org.au/${DRONE_REPO,,}
-      cache_from: docker.asci.synchrotron.org.au/${DRONE_REPO,,}:latest
-      tags:
-        - latest
-        - ${DRONE_TAG}-${DRONE_BUILD_NUMBER}
-      mtu: 1480
-      build_args:
-        - BUILD_GIT_BRANCH=${DRONE_COMMIT_BRANCH}
-        - BUILD_GIT_COMMIT=${DRONE_COMMIT}
-        - BUILD_GIT_AUTHOR=${DRONE_COMMIT_AUTHOR}
-        - BUILD_GIT_AUTHOR_NAME=${DRONE_COMMIT_AUTHOR_NAME}
-        - BUILD_GIT_REPO_LINK=${DRONE_REPO_LINK}
-        - BUILD_CREATED=${DRONE_BUILD_CREATED}
-        - BUILD_NUMBER=${DRONE_BUILD_NUMBER}
+    commands:
+      - |
+        <<EOT sh
+        /usr/bin/buildctl-daemonless.sh build \
+          --progress 'plain' \
+          --frontend 'dockerfile.v0' \
+          --local 'context=.' \
+          --local 'dockerfile=.' \
+          --output 'type=image,name=docker.asci.synchrotron.org.au/${DRONE_REPO,,}:${DRONE_COMMIT},push=true' \
+          --opt target=runtime \
+          --opt build-arg:BUILD_GIT_BRANCH=${DRONE_COMMIT_BRANCH} \
+          --opt build-arg:BUILD_GIT_COMMIT=${DRONE_COMMIT} \
+          --opt build-arg:BUILD_GIT_AUTHOR=${DRONE_COMMIT_AUTHOR} \
+          --opt build-arg:BUILD_GIT_AUTHOR_NAME=${DRONE_COMMIT_AUTHOR_NAME} \
+          --opt build-arg:BUILD_GIT_REPO_LINK=${DRONE_REPO_LINK} \
+          --opt build-arg:BUILD_CREATED=${DRONE_BUILD_CREATED} \
+          --opt build-arg:BUILD_NUMBER=${DRONE_BUILD_NUMBER}
+        EOT
 
   - name: notify-teams
     image: docker.asci.synchrotron.org.au/dpi/as-drone-teams-notify:main
