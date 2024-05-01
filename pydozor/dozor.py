@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from os import environ
 from os.path import (
-    dirname as os_dirname,
-    realpath as os_realpath,
-    join as os_joinpath,
     abspath as os_abspath,
+    dirname as os_dirname,
+    join as os_joinpath,
+    realpath as os_realpath,
 )
 from pathlib import Path
 from tempfile import mkdtemp
