@@ -36,20 +36,15 @@ numpy = "^1.26.4"
 cffi = "^1.16.0"
 h5py = "^3.10.0"
 bitshuffle = "^0.5.1"
-annotated-types = ">=0.4.0"
 typing-extensions = ">=4.11.0"
-pydantic-core = "2.18.1"
 pydantic = "2.7.0"
-dectris-compression = ">=0.3.1,<0.4.0"
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-platformdirs = "4.2.1"
-filelock = "3.14.0"
-distlib = "0.3.8"
 pre-commit = "3.7.0"
+dectris-compression = ">=0.3.1,<0.4.0"
 
 
 [tool.black]
