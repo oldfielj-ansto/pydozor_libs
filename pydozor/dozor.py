@@ -1,150 +1,173 @@
-from cffi import FFI
+from __future__ import annotations
 
-__all__ = ("Dozor",)
+from os import environ
+from os.path import (
+    abspath as os_abspath,
+    dirname as os_dirname,
+    join as os_joinpath,
+    realpath as os_realpath,
+)
+from pathlib import Path
+from tempfile import mkdtemp
+from typing import TYPE_CHECKING, Self
+
+from pydantic import FilePath, NewPath, validate_call
+
+from ._compat import Datacol, DatacolPickle, Detector, Local, Reflection, ffi
+from .schemas import DatacolSchema, DataSchema, DozorConfig, ReflectionSchema
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+__all__ = ("create_config_file", "Dozor")
+
+CUR_DIR = os_dirname(os_realpath(__file__))
 
 
-ffi = FFI()
-ffi.cdef("""
-    struct DETECTOR
-    {
-        int ix, iy;
-        int ix_unbinned, iy_unbinned;
-        int binning_factor;     
-        float pixel;
-    };
-    
-    struct DATACOL
-    {
-        float wave;
-        float dist;
-        float monoch;
-        float aconst;
-        int Ispot;
-        float texposure;
-        int mrd;
-        float hmax2;
-        float hmin2;
-        float delh2;
-        float mgain;
-        float backpol[51];
-        float backpolP[51];
-        float backerr[51];
-            
-        float IMstep;
+_lib_dozor_path = "libdozor.so"
+if "LIB_DOZOR_PATH" in environ:
+    _lib_dozor_path = environ.get("LIB_DOZOR_PATH")
+elif Path(os_joinpath(CUR_DIR, "../libdozor.so")).exists():
+    _lib_dozor_path = str(os_abspath(os_joinpath(CUR_DIR, "../libdozor.so")))
 
-        float xcen, ycen;
-        float start_angl, phiwidth;
-        int number_images,image_first;
-        int graph, sprint, backg, rd, isum;
-        int w, wg;
-        int pr;
-        int prAll;
-        float vbin[50];
-        int pixel_min, pixel_max;
-        int Kxmin, Kxmax, Kymin, Kymax;
-        int nbad;
-        int Bxmin[50], Bxmax[50], Bymin[50], Bymax[50];
-        int wedge;
-        int pLim1[1101], pLim2[1101];
-        float idealback0[50];
-        float idealback[150]; //50*3
-            
-        float RList[51051]; //51*1001
-        float hklKoor[102000]; //51*1000*2
-        float Ilimit[51];
-        
-        float vbins[51];
-        float vbina[51];
-        float Wil[2103]; //3*701
+dozor = ffi.dlopen(_lib_dozor_path)
 
-        float beamstop_size;
-        float beamstop_distance;
-        int beamstop_vertical;
-            
-        float sigLev;
-    };
-    
-    struct LOCAL
-    {
-        float cos2tet2[51];
-        float pol[765]; //51*15
-        float absorb[51];
-    };
-    
-    struct DATACOL_PICKLE
-    {
-        float backpol2D[51];
-        float Rfexp;
-        float Iav;
-        int NofR;
-        float dlim;
-        double SumTotal2D, SumBack2D;
-        float Coef;
-        int table_suc;
-        double table_sc;
-        double table_b;
-        float table_resol;
-        float table_corr;
-        float table_rfact;
-        float table_intsum;
-    
-        float table_est;      
-        float score2;
-        float score3;
-        float dlim09;
-        int   NofS;
-    };
-    
-    struct Reflection
-    {
-        float x;
-        float y;
-        float intensity;
-    };
-    
-    void dozor_set_defaults_(struct DATACOL*);
-    void read_dozor_(struct DETECTOR*, struct DATACOL*, char[1024], char[1024], char*);
-    void pre_dozor_(struct DETECTOR*, struct DATACOL*, struct LOCAL*, char*, char*, int*);
-    void dozor_do_image_(short*, struct DETECTOR*, struct DATACOL*, struct DATACOL*, struct DATACOL_PICKLE*, struct LOCAL*, char*, char*);
-    void dozor_get_spot_list_(struct DETECTOR*, struct DATACOL*, struct DATACOL_PICKLE*, short*, struct Reflection*);
-    """)
 
-dozor = ffi.dlopen('libdozor.so')
+@validate_call
+def create_config_file(
+    config: DozorConfig,
+    *,
+    path: NewPath | None = None,
+) -> Path:
+    """Create a new Dozor config file.
 
-class Dozor():
-    def __init__(self, config_file):
-        self.data_input = ffi.new('struct DATACOL*')
-        dozor.dozor_set_defaults_(self.data_input)
+    Parameters
+    ----------
+    config : DozorConfig
+        Dozor configuration to be written to disk.
+    path : NewPath | None, optional
+        Path to create Dozor config file at, if undefined a `dozor.dat` file
+        will be created under a new temporary directory, by default None.
 
-        self.detector = ffi.new('struct DETECTOR*')
+    Returns
+    -------
+    Path
+        File path to created Dozor config file.
+    """
+    if path is None:
+        path = Path(f"{mkdtemp()}/dozor.dat")
 
-        self.detector.binning_factor = 1
-        
-        self.detector.ix = 0
-        self.detector.iy = 0
-        self.detector.pixel =0.0  #0.075
-        fname = ffi.new('char[1024]', config_file)
-        templ = ffi.new('char[1024]')
-        library = ffi.cast('char*', ffi.NULL) #ffi.new("char**", ffi.NULL)
-        dozor.read_dozor_(self.detector, self.data_input, fname, templ, library)
+    with open(path, "w") as _file:
+        _file.write(config.model_dump())
+    return path
 
-        self.local = ffi.new('struct LOCAL*')
-        self.detector.ix = self.detector.ix_unbinned * self.detector.binning_factor
-        self.detector.iy = self.detector.iy_unbinned * self.detector.binning_factor
-        detector_xy = self.detector.ix * self.detector.iy
-        self.PSIim = ffi.new('char[%d]' % detector_xy)
-        self.KLim = ffi.new('char[%d]' % detector_xy)
-        debug = ffi.new('int*', 0)
-        dozor.pre_dozor_(self.detector, self.data_input, self.local, self.PSIim, self.KLim, debug)
 
-    def do_image(self, img):
-        data = ffi.new('struct DATACOL_PICKLE*')
-        datacol = ffi.new('struct DATACOL*')
-        dozor.dozor_do_image_(ffi.cast('short*', ffi.from_buffer(img)), self.detector, 
-                              self.data_input, datacol, data, self.local, self.PSIim, self.KLim)
-        #print ("get spots results")
-        # get spot list
-        spots = None
-        spots = ffi.new('struct Reflection[%d]' %data.NofR)
-        dozor.dozor_get_spot_list_(self.detector, datacol, data, ffi.cast('short*', ffi.from_buffer(img)), spots)
-        return data, spots
+class Dozor:
+    """Python Wrapper For Dozor"""
+
+    @validate_call
+    def __init__(self, config_file: FilePath) -> None:
+        _data_input = Datacol()
+        _detector = Detector()
+        _local = Local()
+
+        dozor.dozor_set_defaults_(_data_input)
+
+        dozor.read_dozor_(
+            _detector,
+            _data_input,
+            ffi.new("char[1024]", str(config_file).encode("utf-8")),
+            ffi.new("char[1024]"),
+            ffi.cast("char*", ffi.NULL),
+        )
+
+        _detector.ix = _detector.ix_unbinned * _detector.binning_factor
+        _detector.iy = _detector.iy_unbinned * _detector.binning_factor
+
+        self._pixel_count: int = _detector.ix * _detector.iy
+
+        _psi_im = ffi.new(f"char[{self._pixel_count}]")
+        _kl_im = ffi.new(f"char[{self._pixel_count}]")
+        dozor.pre_dozor_(
+            _detector,
+            _data_input,
+            _local,
+            _psi_im,
+            _kl_im,
+            ffi.new("int*", 0),
+        )
+
+        self._data_input = Datacol.to_dict(_data_input)
+        self._detector = Detector.to_dict(_detector)
+        self._local = Local.to_dict(_local)
+        self._psi_im: bytes = ffi.string(_psi_im, self._pixel_count)
+        self._kl_im: bytes = ffi.string(_kl_im, self._pixel_count)
+
+    def do_image(self: Self, image: NDArray) -> tuple[DatacolSchema, DataSchema]:
+        """Call Dozor to process frame.
+
+        Wrapper around Dozor `dozor_do_image` subroutine.
+
+        Parameters
+        ----------
+        image : NDArray
+            Frame to process.
+
+        Returns
+        -------
+        tuple[DatacolSchema, DataSchema]
+            Decoded output from `dozor_do_image`.
+        """
+        _datacol = Datacol()
+        _data = DatacolPickle()
+        dozor.dozor_do_image_(
+            ffi.cast("short*", ffi.from_buffer(image)),
+            Detector(**self._detector),
+            Datacol(**self._data_input),
+            _datacol,
+            _data,
+            Local(**self._local),
+            ffi.new(f"char[{self._pixel_count}]", self._psi_im),
+            ffi.new(f"char[{self._pixel_count}]", self._kl_im),
+        )
+        return (
+            Datacol.to_dict(_datacol),
+            DatacolPickle.to_dict(_data),
+        )
+
+    def get_spot_list(
+        self: Self,
+        image: NDArray,
+        data: DataSchema,
+        datacol: DatacolSchema,
+    ) -> list[ReflectionSchema]:
+        """Get spot X/Y coordinates.
+
+        Wrapper around Dozor `dozor_get_spot_list` subroutine.
+
+        Parameters
+        ----------
+        image : NDArray
+            Frame to get spots coords for.
+        data : DataSchema
+            Output from `dozor_do_image`.
+        datacol : DatacolSchema
+            Datacol.
+
+        Returns
+        -------
+        list[ReflectionSchema]
+            Spots X/Y coordinates.
+        """
+        _spots_length = data["NofR"]
+        _spots = ffi.new(f"struct Reflection[{_spots_length}]")
+        dozor.dozor_get_spot_list_(
+            Detector(**self._detector),
+            Datacol(**datacol),
+            DatacolPickle(**data),
+            ffi.cast("short*", ffi.from_buffer(image)),
+            _spots,
+        )
+        return [
+            Reflection.to_dict(_item) for _item in ffi.unpack(_spots, _spots_length)
+        ]

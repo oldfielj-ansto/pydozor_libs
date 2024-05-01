@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Docker: Python - PyDozor",
+            "name": "Docker: PyDozor (test.py)",
             "type": "docker",
             "request": "launch",
             "preLaunchTask": "docker-run: debug",
@@ -25,9 +25,24 @@
                     }
                 ],
                 "justMyCode": false,
-                "args": ["--master", "/opt/dozor/.test_data/testraster01_0008_master.h5", "-o", "/opt/pydozor/.tmp_pydozor_output", "-n", "10"]
+                "args": []
             },
             "removeContainerAfterDebug": true
+        },
+        {
+            "name": "Python: Debug Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "purpose": ["debug-test"],
+            "presentation": {
+                "hidden": true,
+                "group": "",
+                "order": 1
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {}
         }
     ]
 }

@@ -1,0 +1,5 @@
+[run]
+omit =
+    tests/*
+    test.py
+    pydozor/__version__.py
