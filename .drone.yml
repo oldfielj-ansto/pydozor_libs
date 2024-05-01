@@ -96,6 +96,8 @@ steps:
         EOT
 
   - name: notify-teams
+    when:
+      status: [success, failure]
     image: docker.asci.synchrotron.org.au/dpi/as-drone-teams-notify:main
     settings:
       webhook_url:
@@ -199,6 +201,8 @@ steps:
         EOT
 
   - name: notify-teams
+    when:
+      status: [success, failure]
     image: docker.asci.synchrotron.org.au/dpi/as-drone-teams-notify:main
     settings:
       webhook_url:
