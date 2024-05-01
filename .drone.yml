@@ -16,7 +16,7 @@ steps:
     commands:
       - env | sort
       - apt-get update && apt-get install -y gcc git
-      - python -m pip install "poetry==${POETRY_VERSION}" --user --no-warn-script-location
+      - python -m pip install "poetry==$${POETRY_VERSION}" --user --no-warn-script-location
       - python -m poetry install --only main,dev
       - python -m poetry run pre-commit run --all-files
 
@@ -119,7 +119,7 @@ steps:
     commands:
       - env | sort
       - apt-get update && apt-get install -y gcc git
-      - python -m pip install "poetry==${POETRY_VERSION}" --user --no-warn-script-location
+      - python -m pip install "poetry==$${POETRY_VERSION}" --user --no-warn-script-location
       - python -m poetry install --only main,dev
       - python -m poetry run pre-commit run --all-files
 
