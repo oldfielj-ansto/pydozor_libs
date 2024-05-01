@@ -8,24 +8,22 @@ trigger:
 steps:
   - name: "Pre-Commit Checks"
     image: python:3.11-slim-bookworm
+    environment:
+      DEBIAN_FRONTEND: "noninteractive"
+      PIP_ROOT_USER_ACTION: "ignore"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      POETRY_VERSION: "1.8.2"
     commands:
       - |
         <<EOT bash
         set -ex;
-
-        export DEBIAN_FRONTEND="${DEBIAN_FRONTEND:=noninteractive}"
-        export PIP_ROOT_USER_ACTION="${PIP_ROOT_USER_ACTION:=ignore}"
-        export PIP_DISABLE_PIP_VERSION_CHECK="${PIP_DISABLE_PIP_VERSION_CHECK:=1}"
-        export POETRY_VERSION="${POETRY_VERSION:=1.8.2}"
-
         apt-get update && apt-get install -y gcc git
-
         python -m pip install "poetry==${POETRY_VERSION}" --user --no-warn-script-location
         python -m poetry install --only main,dev
         python -m poetry run pre-commit run --all-files
         EOT
 
-  - name: "[Dev] Docker Build PIP Package"
+  - name: "[Dev] Build PIP Package"
     image: moby/buildkit:rootless
     when:
       status: [success]
@@ -116,24 +114,22 @@ trigger:
 steps:
   - name: "Pre-Commit Checks"
     image: python:3.11-slim-bookworm
+    environment:
+      DEBIAN_FRONTEND: "noninteractive"
+      PIP_ROOT_USER_ACTION: "ignore"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      POETRY_VERSION: "1.8.2"
     commands:
       - |
         <<EOT bash
         set -ex;
-
-        export DEBIAN_FRONTEND="${DEBIAN_FRONTEND:=noninteractive}"
-        export PIP_ROOT_USER_ACTION="${PIP_ROOT_USER_ACTION:=ignore}"
-        export PIP_DISABLE_PIP_VERSION_CHECK="${PIP_DISABLE_PIP_VERSION_CHECK:=1}"
-        export POETRY_VERSION="${POETRY_VERSION:=1.8.2}"
-
         apt-get update && apt-get install -y gcc git
-
         python -m pip install "poetry==${POETRY_VERSION}" --user --no-warn-script-location
         python -m poetry install --only main,dev
         python -m poetry run pre-commit run --all-files
         EOT
 
-  - name: "[Prod] Docker Build PIP Package"
+  - name: "[Prod] Build PIP Package"
     image: moby/buildkit:rootless
     when:
       status: [success]
