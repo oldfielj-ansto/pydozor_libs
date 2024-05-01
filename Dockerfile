@@ -158,4 +158,4 @@ COPY --from=build /opt/pydozor/dist .
 #### Container Runtime ####
 FROM builder AS runtime
 
-COPY --link ./dozor_offline.py ./test.py ./
+COPY --link ./dozor_offline.py ./
