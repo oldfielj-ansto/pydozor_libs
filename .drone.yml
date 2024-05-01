@@ -15,14 +15,10 @@ steps:
       POETRY_VERSION: "1.8.2"
     commands:
       - env | sort
-      - |
-        <<EOT bash
-        set -ex;
-        apt-get update && apt-get install -y gcc git
-        python -m pip install "poetry==${POETRY_VERSION}" --user --no-warn-script-location
-        python -m poetry install --only main,dev
-        python -m poetry run pre-commit run --all-files
-        EOT
+      - apt-get update && apt-get install -y gcc git
+      - python -m pip install "poetry==${POETRY_VERSION}" --user --no-warn-script-location
+      - python -m poetry install --only main,dev
+      - python -m poetry run pre-commit run --all-files
 
   - name: "[Dev] Build PIP Package"
     image: moby/buildkit:rootless
@@ -122,14 +118,10 @@ steps:
       POETRY_VERSION: "1.8.2"
     commands:
       - env | sort
-      - |
-        <<EOT bash
-        set -ex;
-        apt-get update && apt-get install -y gcc git
-        python -m pip install "poetry==${POETRY_VERSION}" --user --no-warn-script-location
-        python -m poetry install --only main,dev
-        python -m poetry run pre-commit run --all-files
-        EOT
+      - apt-get update && apt-get install -y gcc git
+      - python -m pip install "poetry==${POETRY_VERSION}" --user --no-warn-script-location
+      - python -m poetry install --only main,dev
+      - python -m poetry run pre-commit run --all-files
 
   - name: "[Prod] Build PIP Package"
     image: moby/buildkit:rootless
