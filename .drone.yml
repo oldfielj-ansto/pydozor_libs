@@ -14,6 +14,7 @@ steps:
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
       POETRY_VERSION: "1.8.2"
     commands:
+      - env | sort
       - |
         <<EOT bash
         set -ex;
@@ -120,6 +121,7 @@ steps:
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
       POETRY_VERSION: "1.8.2"
     commands:
+      - env | sort
       - |
         <<EOT bash
         set -ex;
