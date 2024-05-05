@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydozor"
-version = "0.2.0"
+version = "0.3.0"
 description = "Python interface to Dozor."
 license = "MIT"
 authors = ["Jie Nan <jie.nan@maxiv.lu.se>"]
@@ -34,7 +34,7 @@ priority = "supplemental"
 python = ">=3.11,<3.12"
 numpy = "^1.26.4"
 cffi = "^1.16.0"
-h5py = "^3.10.0"
+h5py = "^3.8.0"
 bitshuffle = "^0.5.1"
 typing-extensions = ">=4.11.0"
 pydantic = "2.7.0"
