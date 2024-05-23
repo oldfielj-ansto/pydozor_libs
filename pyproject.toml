@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydozor"
-version = "0.3.1"
+version = "0.3.2"
 description = "Python interface to Dozor."
 license = "MIT"
 authors = ["Jie Nan <jie.nan@maxiv.lu.se>"]

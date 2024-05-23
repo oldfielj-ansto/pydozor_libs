@@ -4,7 +4,7 @@ from pathlib import Path
 from tempfile import mkdtemp
 from typing import TYPE_CHECKING, Any, overload
 
-from numpy import uint16, unsignedinteger
+from numpy import uint16, unsignedinteger, where as np_where
 from pydantic import NewPath, validate_call
 
 from .dozor import Dozor
@@ -91,7 +91,6 @@ def call_dozor(
 
     _np_frame = _convert_to_uint16(frame.copy(), _dozor_wrapper.pixel_max)
 
-    # _np_frame[_idx] = 65535
-    _np_frame = _np_frame * mask
+    _np_frame[np_where(mask > 0)] = 65535
 
     return _dozor_wrapper.do_image(_np_frame)
