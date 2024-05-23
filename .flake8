@@ -5,4 +5,4 @@ max-complexity = 18
 select = B,C,E,F,W,T4,B9
 per-file-ignores =
     dozor_offline.py:E501,B950,B904,B007
-    pydozor/_compat.py:E501,B950
+    pydozor/_compat/dozor.py:E501,B950

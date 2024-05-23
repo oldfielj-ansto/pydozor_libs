@@ -10,13 +10,12 @@ from os.path import (
 from pathlib import Path
 from typing import TYPE_CHECKING, Self
 
-from cffi import FFI
 from ._compat.dozor import Datacol, DatacolPickle, Detector, Local, ffi
 from .schemas import DatacolSchema, DataSchema
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
     from numpy import uint16
+    from numpy.typing import NDArray
 
 __all__ = ("Dozor",)
 

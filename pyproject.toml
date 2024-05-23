@@ -32,10 +32,10 @@ priority = "supplemental"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-numpy = "^1.26.4"
-cffi = "^1.16.0"
-h5py = "^3.8.0"
-bitshuffle = "^0.5.1"
+numpy = ">=1.26.4"
+cffi = ">=1.16.0,<1.17.0"
+h5py = ">=3.8.0,<3.12.0"
+bitshuffle = ">=0.5.1,<0.6.0"
 typing-extensions = ">=4.11.0"
 pydantic = ">=2.7.0,<2.8.0"
 

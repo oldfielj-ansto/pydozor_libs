@@ -3,8 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 from tempfile import mkdtemp
 from typing import TYPE_CHECKING, Any, overload
-from pydantic import validate_call, NewPath
+
 from numpy import uint16, unsignedinteger
+from pydantic import NewPath, validate_call
+
 from .dozor import Dozor
 from .schemas import DatacolSchema, DataSchema, DozorConfig
 
@@ -36,9 +38,7 @@ def _convert_to_uint16(
         array = array.astype(uint16)
     elif array.dtype > uint16:
         # if count is over 65534 and below max_count, set to the max value for uint16
-        array[
-            (array >65534) & (array <= pixel_max)
-        ] = 65534
+        array[(array > 65534) & (array <= pixel_max)] = 65534
         array[array > pixel_max] = 65535
         array = array.astype(uint16)
     return array
@@ -74,7 +74,7 @@ def create_config_file(
 
 
 @overload
-def call_dozor(
+def call_dozor(  # noqa: E704
     mask: NDArray[unsignedinteger[Any]],
     frame: NDArray[unsignedinteger[Any]],
     config_file: Path,
@@ -92,6 +92,6 @@ def call_dozor(
     _np_frame = _convert_to_uint16(frame.copy(), _dozor_wrapper.pixel_max)
 
     # _np_frame[_idx] = 65535
-    _np_frame = (_np_frame * mask)
+    _np_frame = _np_frame * mask
 
     return _dozor_wrapper.do_image(_np_frame)
